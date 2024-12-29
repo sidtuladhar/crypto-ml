@@ -1,40 +1,10 @@
-import math
 import numpy as np
-from pandas.core.frame import DataFrame
-from src.scraper import load_csv
+from auto_random_forest import init_data
 from joblib import Parallel, delayed
+from pandas.core.frame import DataFrame
 from sklearn.metrics import classification_report
 
-config = {"mode": "classification"}
-
-
-def init_data(file_path):
-    df = load_csv(file_path)
-    df["Volume"] = df["Volume"].str.replace(",", "").astype(int)
-    df["Pct_Change"] = ((df["Close"].shift(-1) - df["Close"]) / df["Close"]) * 100
-    df["Pct_Change_5d"] = (df["Close"].shift(-5) - df["Close"]) / df["Close"] * 100
-    df["Signal"] = df["Pct_Change_5d"].apply(classify_change)
-    df["Lag_1"] = df["Close"].shift(-1)
-    df["Lag_2"] = df["Close"].shift(-2)
-    df["MA_5"] = df["Close"].rolling(5).mean()
-    df["MA_10"] = df["Close"].rolling(10).mean()
-
-    # Voltaility
-    df["Volatility_10d"] = df["Pct_Change"].rolling(window=10).std()
-    df["Lag_1_MA_5"] = df["Lag_1"] * df["MA_5"]
-
-    # Bollinger Bands
-    df["SMA_20"] = df["Close"].rolling(window=20).mean()
-    df["Std_Dev"] = df["Close"].rolling(window=20).std()
-    df["Bollinger_Upper"] = df["SMA_20"] + (2 * df["Std_Dev"])
-    df["Bollinger_Lower"] = df["SMA_20"] - (2 * df["Std_Dev"])
-    df.dropna(inplace=True)
-
-    # NOTE: data order is earliest to oldest
-    test_data = df[: math.floor(len(df) * 0.2)]
-    training_data = df[math.floor(len(df) * 0.2) :]
-
-    return training_data, test_data
+config = {"mode": "regression"}
 
 
 def classify_change(pct_change, buy_threshold=3.0, sell_threshold=-3.0):
@@ -294,7 +264,7 @@ def get_feature_importances(forest, features):
 
 
 if __name__ == "__main__":
-    training_data, test_data = init_data("./data/jp_morgan_data.csv")
+    training_data, test_data = init_data("./data/shopify_data.csv")
 
     features = [
         "Lag_1",

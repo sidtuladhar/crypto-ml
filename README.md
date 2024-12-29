@@ -9,32 +9,51 @@
 | Number of Trees    | 30                                |
 | Max Depth          | 10                                |
 | Number of Features | `sqrt(len(features))`             |
-| Company            | RMSE %                            |
-| --------------     | -----------------                 |
-| Apple              | 10.48%                            |
-| Tesla              | 4.66%                             |
-| Nvidia             | 59.17%                            |
-| JP Morgan          | 19.42%                            |
-| Shopify            | 3.11%                             |
+
+| Company   | RMSE % |
+| --------- | ------ |
+| Apple     | 12.95% |
+| Tesla     | 17.84% |
+| Nvidia    | 65.14% |
+| JP Morgan | 19.42% |
+| Shopify   | 4.55%  |
 
 ## Manual Random Forest (Classification)
 
-| Parameter          | Value                                  |
-| ------------------ | -------------------------------------- |
-| Threshold          | 5% Change over 5 days                  |
-| Features           | `["Lag_1", "Lag_2", "MA_5", "Volume"]` |
-| Min Samples        | 10                                     |
-| Number of Trees    | 30                                     |
-| Max Depth          | 10                                     |
-| Number of Features | `sqrt(len(features))`                  |
-| Company            | F1 Score (Weighted)                    |
-| --------------     | -----------------                      |
-| Apple              | 0.56                                   |
-| Tesla              | 0.46                                   |
-| Nvidia             | 0.34                                   |
-| JP Morgan          | 0.18                                   |
-| Shopify            | 0.29                                   |
+| Parameter          | Value                                                   |
+| ------------------ | ------------------------------------------------------- |
+| Features           | `Lag_1`, `Lag_2`, `MA_5`, `MA_10`, `SMA_20`,            |
+|                    | `Bollinger_Upper`, `Bollinger_Lower`, `Volatility_10d`, |
+|                    | `Volume`                                                |
+| Min Samples        | 10                                                      |
+| Number of Trees    | 30                                                      |
+| Max Depth          | 10                                                      |
+| Number of Features | `sqrt(len(features))`                                   |
+
+| Company   | F1 Score (Weighted) |
+| --------- | ------------------- |
+| Apple     | 0.56                |
+| Tesla     | 0.46                |
+| Nvidia    | 0.34                |
+| JP Morgan | 0.18                |
+| Shopify   | 0.29                |
 
 ## Sci-kit Random Forest (Regression)
 
+| Company   | RMSE % |
+| --------- | ------ |
+| Apple     | 11.65% |
+| Tesla     | 4.06%  |
+| Nvidia    | 59.02% |
+| JP Morgan | 19.50% |
+| Shopify   | 0.59%  |
+
 ## Sci-kit Random Forest (Classification)
+
+| Company   | F1 Score (Weighted) |
+| --------- | ------------------- |
+| Apple     | 0.61                |
+| Tesla     | 0.61                |
+| Nvidia    | 0.34                |
+| JP Morgan | 0.62                |
+| Shopify   | 0.52                |
