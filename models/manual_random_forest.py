@@ -1,4 +1,5 @@
 import numpy as np
+from typing import List
 from auto_random_forest import init_data
 from joblib import Parallel, delayed
 from pandas.core.frame import DataFrame
@@ -7,7 +8,7 @@ from sklearn.metrics import classification_report
 config = {"mode": "regression"}
 
 
-def classify_change(pct_change, buy_threshold=3.0, sell_threshold=-3.0):
+def classify_change(pct_change, buy_threshold=5.0, sell_threshold=-5.0) -> str:
     if pct_change > buy_threshold:
         return "Buy"
     elif pct_change < sell_threshold:
@@ -20,7 +21,9 @@ def bootstrap_sample(data: DataFrame):
     return data.sample(frac=1, replace=True)
 
 
-def calculate_split_mse(data_left, data_right, target_column, mode=config["mode"]):
+def calculate_split_mse(
+    data_left: DataFrame, data_right: DataFrame, target_column: str, mode=config["mode"]
+) -> float:
     total = len(data_left) + len(data_right)
 
     if len(data_left) == 0 or len(data_right) == 0:
@@ -29,20 +32,25 @@ def calculate_split_mse(data_left, data_right, target_column, mode=config["mode"
     if mode == "regression":
         left_mean = data_left[target_column].mean()
         right_mean = data_right[target_column].mean()
-        return (
-            (len(data_left) / total)
-            * mean_squared_error(data_left[target_column], left_mean)
-        ) + (
-            (len(data_right) / total)
-            * mean_squared_error(data_right[target_column], right_mean)
+        return float(
+            (
+                (len(data_left) / total)
+                * mean_squared_error(data_left[target_column], left_mean)
+            )
+            + (
+                (len(data_right) / total)
+                * mean_squared_error(data_right[target_column], right_mean)
+            )
         )
     elif mode == "classification":
         return (len(data_left) / total) * calculate_gini(data_left, target_column) + (
             len(data_right) / total
         ) * calculate_gini(data_right, target_column)
 
+    raise ValueError(f"Unsupported mode: {mode}")
 
-def calculate_gini(data, target_column):
+
+def calculate_gini(data: DataFrame, target_column: str):
     total = len(data)
     if total == 0:  # Avoid division by zero
         return 0
@@ -51,7 +59,9 @@ def calculate_gini(data, target_column):
     return gini
 
 
-def calculate_best_split(data: DataFrame, features, target_column, mode=config["mode"]):
+def calculate_best_split(
+    data: DataFrame, features: List[str], target_column: str, mode=config["mode"]
+):
     best_mse = float("inf")
     best_feature = None
     best_threshold = None
@@ -224,13 +234,14 @@ def predict_random_forest(forest, sample, mode=config["mode"]):
     predictions = [predict_tree(tree, sample) for tree in forest]
 
     if mode == "regression":
+        predictions = np.array(predictions, dtype=float)
         return np.mean(predictions)
+
     elif mode == "classification":
         class_counts = {}
         for pred in predictions:
             class_counts[pred] = class_counts.get(pred, 0) + 1
-        # Return the class with the highest count
-        return max(class_counts, key=class_counts.get)
+        return max(class_counts, key=lambda k: class_counts[k])
 
 
 def predict_random_forest_batch(forest, data, mode=config["mode"]):
@@ -245,7 +256,7 @@ def mean_squared_error(y_true, y_pred):
     return np.mean((y_true - y_pred) ** 2)
 
 
-def calculate_accuracy(true_labels, predicted_labels):
+def calculate_accuracy(true_labels, predicted_labels) -> float:
     correct = sum(
         1 for true, pred in zip(true_labels, predicted_labels) if true == pred
     )
@@ -253,7 +264,7 @@ def calculate_accuracy(true_labels, predicted_labels):
     return (correct / total) * 100
 
 
-def get_feature_importances(forest, features):
+def get_feature_importances(forest, features) -> dict:
     feature_importances = {feature: 0 for feature in features}
     for tree in forest:
         if isinstance(tree, dict):
@@ -264,7 +275,7 @@ def get_feature_importances(forest, features):
 
 
 if __name__ == "__main__":
-    training_data, test_data = init_data("./data/shopify_data.csv")
+    training_data, test_data = init_data("./data/tesla_data.csv")
 
     features = [
         "Lag_1",
@@ -279,7 +290,7 @@ if __name__ == "__main__":
     ]
 
     min_samples = 10
-    n_trees = 30
+    n_trees = 5
     max_depth = 10
     n_features = int(len(features) ** 0.5)
 

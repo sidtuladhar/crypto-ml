@@ -35,8 +35,8 @@
 | Apple     | 0.56                |
 | Tesla     | 0.46                |
 | Nvidia    | 0.34                |
-| JP Morgan | 0.18                |
-| Shopify   | 0.29                |
+| JP Morgan | 0.64                |
+| Shopify   | 0.50                |
 
 ## Sci-kit Random Forest (Regression)
 
